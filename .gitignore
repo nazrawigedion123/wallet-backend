@@ -1,0 +1,78 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of `go build`
+/bin/
+/build/
+/dist/
+*.a
+
+# Go workspace file (go.work)
+go.work
+go.work.sum
+
+# Test cache and coverage
+*.cover
+*.coverprofile
+*.cov
+*.test
+*.tmp
+
+# Vendor directory (if you're using Go modules, usually unnecessary to track)
+vendor/
+
+# IDE/editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment or sensitive config
+.env
+.env.*
+*.local
+*.secret
+*.key
+*.pem
+*.crt
+
+# Logs and debug
+*.log
+logs/
+debug/
+
+# Database files (SQLite, etc.)
+*.db
+*.sqlite
+*.sqlite3
+
+# Dependency management (only for old GOPATH-style projects)
+Gopkg.lock
+Gopkg.toml
+
+# Node or frontend-related (if you're embedding web UIs)
+node_modules/
+*.tsbuildinfo
+*.bundle.js
+*.map
+*.min.js
+dist/
+
+# Docker / CI artifacts
+.docker/
+docker-compose.override.yml
+
+# Coverage HTML output
+coverage.html

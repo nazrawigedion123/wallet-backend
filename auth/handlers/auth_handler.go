@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/nazrawigedion123/wallet-backend/auth/models"
 
 	"github.com/nazrawigedion123/wallet-backend/auth/middleware"
@@ -160,7 +161,7 @@ func (h *AuthHandler) Profile(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "not authenticated"})
 	}
 
-	userID, ok := userIDVal.(uint)
+	userID, ok := userIDVal.(uuid.UUID)
 	if !ok {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "invalid user id type"})
 	}
@@ -197,7 +198,7 @@ func (h *AuthHandler) TierUpgrade(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "not authenticated"})
 	}
 
-	userID, ok := userIDVal.(uint)
+	userID, ok := userIDVal.(uuid.UUID)
 	if !ok {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "invalid user id type"})
 	}

@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"errors"
-	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	user_models "github.com/nazrawigedion123/wallet-backend/auth/models"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -46,7 +46,7 @@ func (s *SessionService) CreateSession(user *user_models.User, ipAddress string)
 
 	// Convert struct to a map for Redis HSET
 	metadata := map[string]interface{}{
-		"UserID":    user.ID,
+		"UserID":    user.ID.String(),
 		"Email":     user.Email,
 		"Tier":      user.Tier,
 		"LastLogin": time.Now().Format(time.RFC3339), // store as string
@@ -100,8 +100,13 @@ func (s *SessionService) ValidateSession(tokenString string) (*user_models.Sessi
 
 	metadata := &user_models.SessionMetadata{}
 	if uid, ok := result["UserID"]; ok {
-		parsedID, _ := strconv.ParseUint(uid, 10, 64)
-		metadata.UserID = uint(parsedID)
+
+		parsedUUID, err := uuid.Parse(uid)
+
+		if err == nil {
+
+			metadata.UserID = parsedUUID
+		}
 	}
 	metadata.Email = result["Email"]
 	metadata.Tier = result["Tier"]
@@ -111,9 +116,18 @@ func (s *SessionService) ValidateSession(tokenString string) (*user_models.Sessi
 		metadata.LastLogin = t
 	}
 
-	// Verify token matches stored session
 	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || uint(claims["sub"].(float64)) != metadata.UserID {
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+
+	subStr, ok := claims["sub"].(string)
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+
+	subUUID, err := uuid.Parse(subStr)
+	if err != nil || subUUID != metadata.UserID {
 		return nil, ErrInvalidToken
 	}
 

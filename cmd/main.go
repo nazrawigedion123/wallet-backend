@@ -24,18 +24,25 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/nazrawigedion123/wallet-backend/auth/handlers"
-	auth_middleware "github.com/nazrawigedion123/wallet-backend/auth/middleware"
 	"github.com/nazrawigedion123/wallet-backend/auth/services"
 	db "github.com/nazrawigedion123/wallet-backend/utils"
 
 	_ "github.com/nazrawigedion123/wallet-backend/docs"
 	echoSwagger "github.com/swaggo/echo-swagger"
+
+	authRoutes "github.com/nazrawigedion123/wallet-backend/auth/routes"
+	walletHandler "github.com/nazrawigedion123/wallet-backend/wallet/handlers"
+	walletRoutes "github.com/nazrawigedion123/wallet-backend/wallet/routes"
+	walletService "github.com/nazrawigedion123/wallet-backend/wallet/services"
 )
+
+var redisClient *redis.Client
 
 // @Summary Register a new user
 // @Description Register a new user with the system
@@ -60,6 +67,7 @@ func main() {
 		log.Fatal("❌ JWT_SECRET environment variable is not set")
 	}
 
+	//auth
 	sessionSvc, authSvc := initServices(jwtSecret)
 	authHandler := handlers.NewAuthHandler(authSvc, sessionSvc)
 
@@ -74,6 +82,17 @@ func initDatabase() error {
 }
 
 func initRedis() error {
+	config := db.RedisConfig{
+		Addr:     os.Getenv("REDIS_ADDR"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,
+	}
+	redisClient = redis.NewClient(&redis.Options{
+		Addr:     config.Addr,
+		Password: config.Password,
+		DB:       config.DB,
+	})
+
 	return db.InitRedis()
 }
 
@@ -91,19 +110,16 @@ func setupServer(authHandler *handlers.AuthHandler, sessionSvc *services.Session
 	// Add Swagger route
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	apiGroup := e.Group("/api")
-
-	// Public routes
-	apiGroup.POST("/register", authHandler.Register)
-	apiGroup.POST("/login", authHandler.Login)
-
 	e.Validator = &db.CustomValidator{Validator: validator.New()}
 
-	// Protected routes
-	authGroup := apiGroup.Group("")
-	authGroup.Use(auth_middleware.AuthMiddleware(sessionSvc))
-	authGroup.GET("/profile", authHandler.Profile)
-	authGroup.POST("/tiers/upgrade", authHandler.TierUpgrade)
-	authGroup.POST("/logout", authHandler.Logout)
+	authRoutes.RegisterAuthRoutes(apiGroup, authHandler, sessionSvc)
+
+	ws := walletService.NewWalletService(db.DB, redisClient)
+	walletHandlerInstance := &walletHandler.WalletHandler{
+		WalletService: ws,
+	}
+
+	walletRoutes.RegisterWalletRoutes(apiGroup, walletHandlerInstance, sessionSvc)
 
 	return e
 }

@@ -9,11 +9,11 @@ import (
 	"github.com/go-playground/validator/v10"
 
 	user_models "github.com/nazrawigedion123/wallet-backend/auth/models"
+	wallet_models "github.com/nazrawigedion123/wallet-backend/wallet/models"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
 
 type CustomValidator struct {
 	Validator *validator.Validate
@@ -22,6 +22,7 @@ type CustomValidator struct {
 func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.Validator.Struct(i)
 }
+
 var (
 	DB          *gorm.DB
 	RedisClient *redis.Client
@@ -60,7 +61,10 @@ func InitDB() error {
 		return err
 	}
 	// Auto-migrate the Transaction model
-	err = DB.AutoMigrate(&user_models.User{})
+	err = DB.AutoMigrate(&user_models.User{},
+		&wallet_models.Transaction{},
+		&wallet_models.WalletBalance{},
+	)
 	if err != nil {
 		return err
 	}

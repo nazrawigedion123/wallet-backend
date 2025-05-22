@@ -12,19 +12,27 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// AuthHandler handles authentication related requests
 type AuthHandler struct {
 	authSvc    *services.AuthService
 	sessionSvc *services.SessionService
 }
 
+// RegisterRequest represents the request body for registration
+// @Description Registration request payload
 type RegisterRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=3"`
 }
+
+// TierUpgrade represents the request body for tier upgrade
+// @Description Tier upgrade request payload
 type TierUpgrade struct {
 	Tier string `json:"tier" validate:"required"`
 }
 
+// LoginRequest represents the request body for login
+// @Description Login request payload
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
@@ -37,6 +45,17 @@ func NewAuthHandler(authSvc *services.AuthService, sessionSvc *services.SessionS
 	}
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Register a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body RegisterRequest true "Registration details"
+// @Success 201 {object} models.RegisterResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/register [post]
 func (h *AuthHandler) Register(c echo.Context) error {
 	var req RegisterRequest
 	if err := c.Bind(&req); err != nil {
@@ -59,6 +78,17 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	})
 }
 
+// Login godoc
+// @Summary Login a new user
+// @Description Login a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body LoginRequest true "Registration details"
+// @Success 201 {object} models.LoginResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/login [post]
 func (h *AuthHandler) Login(c echo.Context) error {
 	var req LoginRequest
 	if err := c.Bind(&req); err != nil {
@@ -86,6 +116,17 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	})
 }
 
+// Logout godoc
+// @Summary Logout a new user
+// @Description Logout a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+
+// @Success 201 {object} models.LogoutResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/logout [post]
 func (h *AuthHandler) Logout(c echo.Context) error {
 	cc := middleware.GetAuthContext(c)
 	if cc == nil {
@@ -100,6 +141,17 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "logged out successfully"})
 }
 
+// Profile godoc
+// @Summary Profile a new user
+// @Description Profile a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+
+// @Success 201 {object} models.ProfileResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/profile [get]
 func (h *AuthHandler) Profile(c echo.Context) error {
 
 	userIDVal := c.Get("userID")
@@ -126,6 +178,17 @@ func (h *AuthHandler) Profile(c echo.Context) error {
 	})
 }
 
+// TierUpgrade godoc
+// @Summary TierUpgrade a new user
+// @Description TierUpgrade a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+
+// @Success 201 {object} models.TierUpgradeResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/tiers/upgrade [post]
 func (h *AuthHandler) TierUpgrade(c echo.Context) error {
 
 	userIDVal := c.Get("userID")

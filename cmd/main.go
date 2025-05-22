@@ -1,3 +1,20 @@
+// @title Wallet Backend API
+// @version 1.0
+// @description This is a wallet backend server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 package main
 
 import (
@@ -15,8 +32,16 @@ import (
 	auth_middleware "github.com/nazrawigedion123/wallet-backend/auth/middleware"
 	"github.com/nazrawigedion123/wallet-backend/auth/services"
 	db "github.com/nazrawigedion123/wallet-backend/utils"
+
+	_ "github.com/nazrawigedion123/wallet-backend/docs"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// @Summary Register a new user
+// @Description Register a new user with the system
+// @ID register
+// @Accept  json
+// @Produce  json
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("⚠️  No .env file found or failed to load")
@@ -63,14 +88,18 @@ func setupServer(authHandler *handlers.AuthHandler, sessionSvc *services.Session
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	// Add Swagger route
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	apiGroup := e.Group("/api")
+
 	// Public routes
-	e.POST("/register", authHandler.Register)
-	e.POST("/login", authHandler.Login)
+	apiGroup.POST("/register", authHandler.Register)
+	apiGroup.POST("/login", authHandler.Login)
 
 	e.Validator = &db.CustomValidator{Validator: validator.New()}
 
 	// Protected routes
-	authGroup := e.Group("")
+	authGroup := apiGroup.Group("")
 	authGroup.Use(auth_middleware.AuthMiddleware(sessionSvc))
 	authGroup.GET("/profile", authHandler.Profile)
 	authGroup.POST("/tiers/upgrade", authHandler.TierUpgrade)

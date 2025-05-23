@@ -10,6 +10,7 @@ import (
 
 	user_models "github.com/nazrawigedion123/wallet-backend/auth/models"
 	wallet_models "github.com/nazrawigedion123/wallet-backend/wallet/models"
+	webhook_models "github.com/nazrawigedion123/wallet-backend/webhook/models"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -64,6 +65,7 @@ func InitDB() error {
 	err = DB.AutoMigrate(&user_models.User{},
 		&wallet_models.Transaction{},
 		&wallet_models.WalletBalance{},
+		&webhook_models.WebhookEvent{},
 	)
 	if err != nil {
 		return err

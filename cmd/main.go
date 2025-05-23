@@ -40,6 +40,9 @@ import (
 	walletHandler "github.com/nazrawigedion123/wallet-backend/wallet/handlers"
 	walletRoutes "github.com/nazrawigedion123/wallet-backend/wallet/routes"
 	walletService "github.com/nazrawigedion123/wallet-backend/wallet/services"
+	webHookHandler "github.com/nazrawigedion123/wallet-backend/webhook/handlers"
+	webHookRoutes "github.com/nazrawigedion123/wallet-backend/webhook/routes"
+	webHookService "github.com/nazrawigedion123/wallet-backend/webhook/services"
 )
 
 var redisClient *redis.Client
@@ -120,6 +123,13 @@ func setupServer(authHandler *handlers.AuthHandler, sessionSvc *services.Session
 	}
 
 	walletRoutes.RegisterWalletRoutes(apiGroup, walletHandlerInstance, sessionSvc)
+
+	// Update the webhook handler initialization
+	webhookSvc := webHookService.NewWebhookService(redisClient, db.DB)
+	webhookHandlerInstance := webHookHandler.NewWebhookHandler(webhookSvc)
+	webHookRoutes.RegisterWebhookRoutes(apiGroup, webhookHandlerInstance)
+
+	// Initialize webhook service correctly (replace NewWebhookService with the actual constructor if different)
 
 	return e
 }

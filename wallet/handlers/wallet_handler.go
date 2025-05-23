@@ -35,6 +35,11 @@ func (h *WalletHandler) GetBalance(c echo.Context) error {
 
 func (h *WalletHandler) Deposit(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
+	userTierInterface := c.Get("userTier")
+	userTier, ok := userTierInterface.(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid user tier")
+	}
 
 	var req TransactionRequest
 	if err := c.Bind(&req); err != nil {
@@ -44,7 +49,7 @@ func (h *WalletHandler) Deposit(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	txn, err := h.WalletService.Deposit(userID, req.Amount)
+	txn, err := h.WalletService.Deposit(userID, userTier, req.Amount)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -55,6 +60,12 @@ func (h *WalletHandler) Deposit(c echo.Context) error {
 func (h *WalletHandler) Withdraw(c echo.Context) error {
 
 	userID := c.Get("userID").(uuid.UUID)
+	userTierInterface := c.Get("userTier")
+	userTier, ok := userTierInterface.(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid user tier")
+	}
+
 
 	var req TransactionRequest
 	if err := c.Bind(&req); err != nil {
@@ -64,7 +75,7 @@ func (h *WalletHandler) Withdraw(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	txn, err := h.WalletService.Withdraw(userID, req.Amount)
+	txn, err := h.WalletService.Withdraw(userID,userTier, req.Amount)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

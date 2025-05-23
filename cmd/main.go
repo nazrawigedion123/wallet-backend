@@ -123,6 +123,7 @@ func setupServer(authHandler *handlers.AuthHandler, sessionSvc *services.Session
 	}
 
 	walletRoutes.RegisterWalletRoutes(apiGroup, walletHandlerInstance, sessionSvc)
+	walletRoutes.RegisterSimulationRoutes(apiGroup, walletHandlerInstance)
 
 	// Update the webhook handler initialization
 	webhookSvc := webHookService.NewWebhookService(redisClient, db.DB)

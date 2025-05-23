@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/nazrawigedion123/wallet-backend/wallet/models"
@@ -34,11 +35,6 @@ func NewWalletService(db *gorm.DB, redisClient *redis.Client) *WalletService {
 	go func() {
 		for txn := range service.dbWriter {
 
-			// if err := service.db.Create(&txn).Error; err != nil {
-			// 	log.Printf("failed to save transaction: %v", err)
-			// } else {
-			// 	fmt.Println("Transaction saved:", txn.ID)
-			// }
 			if err := service.db.Create(&txn).Error; err != nil {
 				log.Printf("failed to save transaction: %v", err)
 			} else {
@@ -57,22 +53,6 @@ func NewWalletService(db *gorm.DB, redisClient *redis.Client) *WalletService {
 	return service
 }
 
-// func (ws *WalletService) GetBalance(userID uuid.UUID) (float64, error) {
-
-// 	val, err := ws.redisClient.Get(ctx, ws.balanceKey(userID)).Result()
-// 	if err == redis.Nil {
-// 		return 0.0, nil
-// 	} else if err != nil {
-// 		return 0.0, err
-// 	}
-
-//		var balance float64
-//		err = json.Unmarshal([]byte(val), &balance)
-//		if err != nil {
-//			return 0.0, err
-//		}
-//		return balance, nil
-//	}
 func (ws *WalletService) GetBalance(userID uuid.UUID) (float64, error) {
 	val, err := ws.redisClient.Get(ctx, ws.balanceKey(userID)).Result()
 	if err == redis.Nil {
@@ -93,7 +73,7 @@ func (ws *WalletService) GetBalance(userID uuid.UUID) (float64, error) {
 	return balance, err
 }
 
-func (ws *WalletService) Deposit(userID uuid.UUID, amount float64) (*models.Transaction, error) {
+func (ws *WalletService) Deposit(userID uuid.UUID, userTier string, amount float64) (*models.Transaction, error) {
 	fmt.Println("userid: ", userID)
 	if amount <= 0 {
 		return nil, errors.New("amount must be greater than zero")
@@ -107,13 +87,13 @@ func (ws *WalletService) Deposit(userID uuid.UUID, amount float64) (*models.Tran
 		return nil, err
 	}
 
-	txn := ws.createTransaction(userID, amount, models.DepositTransaction)
+	txn := ws.createTransaction(userID, userTier, amount, models.DepositTransaction)
 	ws.dbWriter <- txn
 
 	return &txn, nil
 }
 
-func (ws *WalletService) Withdraw(userID uuid.UUID, amount float64) (*models.Transaction, error) {
+func (ws *WalletService) Withdraw(userID uuid.UUID, userTier string, amount float64) (*models.Transaction, error) {
 	if amount <= 0 {
 		return nil, errors.New("amount must be greater than zero")
 	}
@@ -130,7 +110,7 @@ func (ws *WalletService) Withdraw(userID uuid.UUID, amount float64) (*models.Tra
 		return nil, err
 	}
 
-	txn := ws.createTransaction(userID, amount, models.WithdrawTransaction)
+	txn := ws.createTransaction(userID, userTier, amount, models.WithdrawTransaction)
 	ws.dbWriter <- txn
 
 	return &txn, nil
@@ -164,14 +144,21 @@ func (ws *WalletService) setBalance(userID uuid.UUID, balance float64) error {
 	return err
 }
 
-func (ws *WalletService) createTransaction(userID uuid.UUID, amount float64, txnType models.TransactionType) models.Transaction {
+func (ws *WalletService) createTransaction(userID uuid.UUID, userTier string, amount float64, txnType models.TransactionType) models.Transaction {
+	feeConfig := models.FeeConfig{TransactionType: "bill_payment", Tier: models.BasicTier, BasePercent: 3.0, Cap: 100.0, Floor: 2.0, PeakStart: time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 17, 0, 0, 0, time.Local), PeakEnd: time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 21, 0, 0, 0, time.Local), PeakSurcharge: 1.0}
+	fee, breakdown := calculateFee(amount, userTier, feeConfig, time.Now())
+
+	breakdownJSON, _ := json.Marshal(breakdown)
 
 	return models.Transaction{
 		UserID: userID,
 		Amount: amount,
 		Type:   txnType,
 		// CreatedAt: time.Now(),
-		Status: "pending",
+		Status:       "pending",
+		Fee:          fee,
+		NetAmount:    amount + fee,
+		FeeBreakdown: breakdownJSON,
 	}
 }
 func (ws *WalletService) GetTransactions(userID uuid.UUID, txnType string, status string, limit int) ([]models.Transaction, error) {
@@ -192,4 +179,42 @@ func (ws *WalletService) GetTransactions(userID uuid.UUID, txnType string, statu
 
 	err := query.Limit(limit).Order("created_at desc").Preload("User").Find(&transactions).Error
 	return transactions, err
+}
+
+func calculateFee(amount float64, userTier string, config models.FeeConfig, now time.Time) (fee float64, breakdown map[string]interface{}) {
+	// Base fee
+	var basePercent float64
+	if userTier == "Premium" {
+		basePercent = 1
+
+	} else {
+		basePercent = 3
+	}
+	fee = amount * float64(basePercent) / 100
+
+	// Time-based surcharge
+	if now.After(config.PeakStart) && now.Before(config.PeakEnd) {
+		surcharge := amount * config.PeakSurcharge / 100
+		fee += surcharge
+		breakdown = map[string]interface{}{
+			"base_fee":       fee - surcharge,
+			"peak_surcharge": surcharge,
+		}
+	} else {
+		breakdown = map[string]interface{}{
+			"base_fee":       fee,
+			"peak_surcharge": 0,
+		}
+	}
+
+	// Enforce floor and cap
+	if fee < config.Floor {
+		fee = config.Floor
+	}
+	if fee > config.Cap {
+		fee = config.Cap
+	}
+
+	breakdown["total_fee"] = fee
+	return fee, breakdown
 }

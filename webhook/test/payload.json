@@ -1,0 +1,12 @@
+ {
+  "type": "wallet_credit",
+  "event_id": "txn_acodnnncncnjnn",         
+  "amount": 150,
+  "currency": "ETB",
+  "status": "success",
+        "user_id": "95dfe0d1-0e5a-4da4-8dd8-f8afe9266f4a",
+  "metadata": {
+    "transaction_id": 5             
+  }
+}
+

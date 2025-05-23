@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/google/uuid"
 	"github.com/nazrawigedion123/wallet-backend/auth/models"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +26,10 @@ type Transaction struct {
 	Type   TransactionType   `json:"type" gorm:"type:varchar(20);not null"`
 	Status TransactionStatus `json:"status" gorm:"type:varchar(20);not null;default:'pending'"`
 
-	User models.User `json:"-" gorm:"foreignKey:UserID;references:ID"`
+	User         models.User    `json:"-" gorm:"foreignKey:UserID;references:ID"`
+	Fee          float64        `json:"fee"`
+	NetAmount    float64        `json:"net_amount"`
+	FeeBreakdown datatypes.JSON `json:"fee_breakdown"`
 }
 
 type WalletBalance struct {

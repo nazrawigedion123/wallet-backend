@@ -12,6 +12,8 @@
 /build/
 /dist/
 *.a
+#csv
+*.csv
 
 # Go workspace file (go.work)
 go.work

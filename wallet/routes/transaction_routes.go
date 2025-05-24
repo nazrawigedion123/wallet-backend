@@ -16,11 +16,8 @@ func RegisterWalletRoutes(e *echo.Group, walletHandler *handlers.WalletHandler, 
 	walletGroup.GET("/wallet/transactions", walletHandler.GetTransactionHistory)
 }
 
-func RegisterSimulationRoutes(e *echo.Group, walletHandler *handlers.WalletHandler) {
+func RegisterSimulationRoutes(e *echo.Group, walletHandler *handlers.WalletHandler){
 	simGroup := e.Group("")
 
 	simGroup.POST("/simulate/users", walletHandler.SimulateUsers)
-	simGroup.POST("/simulate/transactions", walletHandler.SimulateTransactions)
-	simGroup.GET("/simulate/status", walletHandler.GetSimulationStatus)
-
 }

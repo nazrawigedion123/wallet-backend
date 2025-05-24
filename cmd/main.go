@@ -72,7 +72,7 @@ func main() {
 
 	//auth
 	sessionSvc, authSvc := initServices(jwtSecret)
-	authHandler := handlers.NewAuthHandler(authSvc, sessionSvc, db.InitLogger())
+	authHandler := handlers.NewAuthHandler(authSvc, sessionSvc)
 
 	e := setupServer(authHandler, sessionSvc)
 

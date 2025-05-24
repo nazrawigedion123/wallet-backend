@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nazrawigedion123/wallet-backend/auth/models"
-	"go.uber.org/zap"
 
 	"github.com/nazrawigedion123/wallet-backend/auth/middleware"
 	"github.com/nazrawigedion123/wallet-backend/auth/services"
@@ -18,7 +17,6 @@ import (
 type AuthHandler struct {
 	authSvc    *services.AuthService
 	sessionSvc *services.SessionService
-	 logger *zap.Logger
 }
 
 // RegisterRequest represents the request body for registration
@@ -41,11 +39,10 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
-func NewAuthHandler(authSvc *services.AuthService, sessionSvc *services.SessionService,logger *zap.Logger) *AuthHandler {
+func NewAuthHandler(authSvc *services.AuthService, sessionSvc *services.SessionService) *AuthHandler {
 	return &AuthHandler{
 		authSvc:    authSvc,
 		sessionSvc: sessionSvc,
-		 logger: logger,
 	}
 }
 
@@ -157,11 +154,6 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 // @Failure 500 {object} models.ErrorResponse
 // @Router /api/profile [get]
 func (h *AuthHandler) Profile(c echo.Context) error {
-	traceID := uuid.New().String()
-	utils.Logger.Info("Profile endpoint hit",
-		zap.String("trace_id", traceID),
-		zap.String("path", c.Path()),
-	)
 
 	userIDVal := c.Get("userID")
 
@@ -179,10 +171,6 @@ func (h *AuthHandler) Profile(c echo.Context) error {
 
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "user not found"})
 	}
-	utils.Logger.Info("Profile fetched successfully",
-		zap.String("trace_id", traceID),
-		zap.String("user_id", userID.String()),
-	)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"id":    user.ID,

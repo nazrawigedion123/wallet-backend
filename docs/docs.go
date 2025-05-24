@@ -44,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_handlers.LoginRequest"
+                            "$ref": "#/definitions/handlers.LoginRequest"
                         }
                     }
                 ],
@@ -52,19 +52,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.LoginResponse"
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -76,19 +76,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.LogoutResponse"
+                            "$ref": "#/definitions/models.LogoutResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -100,19 +100,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ProfileResponse"
+                            "$ref": "#/definitions/models.ProfileResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -138,7 +138,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth_handlers.RegisterRequest"
+                            "$ref": "#/definitions/handlers.RegisterRequest"
                         }
                     }
                 ],
@@ -146,19 +146,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.RegisterResponse"
+                            "$ref": "#/definitions/models.RegisterResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -170,378 +170,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.TierUpgradeResponse"
+                            "$ref": "#/definitions/models.TierUpgradeResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/simulate/status": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns the current status of background simulations",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Simulation"
-                ],
-                "summary": "Get simulation status",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/simulate/transactions": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Starts a background process to generate simulated transactions",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Simulation"
-                ],
-                "summary": "Simulate transactions",
-                "parameters": [
-                    {
-                        "description": "Simulation options",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_wallet_models.SimulationOptions"
-                        }
-                    }
-                ],
-                "responses": {
-                    "202": {
-                        "description": "Accepted",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/simulate/users": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Starts a background process to generate simulated users",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Simulation"
-                ],
-                "summary": "Simulate user creation",
-                "parameters": [
-                    {
-                        "description": "Simulation options",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_wallet_models.SimulationOptions"
-                        }
-                    }
-                ],
-                "responses": {
-                    "202": {
-                        "description": "Accepted",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wallet/balance": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns the wallet balance for the authenticated user",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Wallet"
-                ],
-                "summary": "Get user wallet balance",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wallet/deposit": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "it deposits a to transaction and adds money to balance",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Wallet"
-                ],
-                "summary": "Deposit to wallet",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wallet/transactions": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves the transaction history for the user's wallet",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Wallet"
-                ],
-                "summary": "Get transaction history",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Filter by transaction type",
-                        "name": "type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by transaction status",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Limit number of transactions (default 50)",
-                        "name": "limit",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/wallet/withdraw": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Withdraws money from the wallet balance",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Wallet"
-                ],
-                "summary": "Withdraw from wallet",
-                "parameters": [
-                    {
-                        "description": "Withdrawal request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/wallet_handlers.TransactionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/webhook": {
-            "post": {
-                "description": "Handles and processes incoming webhook payloads",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Webhooks"
-                ],
-                "summary": "Process incoming webhook",
-                "parameters": [
-                    {
-                        "description": "Webhook payload",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_webhook_models.IncomingWebhook"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Returns error details",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "409": {
-                        "description": "Duplicate webhook event",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -549,7 +190,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth_handlers.LoginRequest": {
+        "handlers.LoginRequest": {
             "description": "Login request payload",
             "type": "object",
             "required": [
@@ -565,7 +206,7 @@ const docTemplate = `{
                 }
             }
         },
-        "auth_handlers.RegisterRequest": {
+        "handlers.RegisterRequest": {
             "description": "Registration request payload",
             "type": "object",
             "required": [
@@ -582,7 +223,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse": {
+        "models.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -590,7 +231,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_nazrawigedion123_wallet-backend_auth_models.LoginResponse": {
+        "models.LoginResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -612,7 +253,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_nazrawigedion123_wallet-backend_auth_models.LogoutResponse": {
+        "models.LogoutResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -620,7 +261,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_nazrawigedion123_wallet-backend_auth_models.ProfileResponse": {
+        "models.ProfileResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -634,7 +275,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_nazrawigedion123_wallet-backend_auth_models.RegisterResponse": {
+        "models.RegisterResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -648,7 +289,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_nazrawigedion123_wallet-backend_auth_models.TierUpgradeResponse": {
+        "models.TierUpgradeResponse": {
             "type": "object",
             "properties": {
                 "email": {
@@ -659,83 +300,6 @@ const docTemplate = `{
                 },
                 "tier": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_nazrawigedion123_wallet-backend_wallet_models.SimulationOptions": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "description": "e.g., up to 1 million",
-                    "type": "integer"
-                },
-                "include_failed": {
-                    "type": "boolean"
-                },
-                "output_to_csv": {
-                    "type": "boolean"
-                },
-                "tier_distribution": {
-                    "description": "assign tiers randomly",
-                    "type": "boolean"
-                },
-                "transaction_types": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "github_com_nazrawigedion123_wallet-backend_webhook_models.IncomingWebhook": {
-            "type": "object",
-            "required": [
-                "amount",
-                "event_id",
-                "status",
-                "type",
-                "user_id"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "event_id": {
-                    "type": "string"
-                },
-                "metadata": {
-                    "$ref": "#/definitions/github_com_nazrawigedion123_wallet-backend_webhook_models.Metadata"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_nazrawigedion123_wallet-backend_webhook_models.Metadata": {
-            "type": "object",
-            "properties": {
-                "transactionID": {
-                    "type": "integer"
-                }
-            }
-        },
-        "wallet_handlers.TransactionRequest": {
-            "type": "object",
-            "required": [
-                "amount"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
                 }
             }
         }
@@ -758,7 +322,7 @@ var SwaggerInfo = &swag.Spec{
 	Title:            "Wallet Backend API",
 	Description:      "This is a wallet backend server.",
 	InfoInstanceName: "swagger",
-    SwaggerTemplate:  docTemplate,
+	SwaggerTemplate:  docTemplate,
 }
 
 func init() {

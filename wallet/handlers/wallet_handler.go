@@ -18,6 +18,15 @@ type TransactionRequest struct {
 	Amount float64 `json:"amount" validate:"required,gt=0"`
 }
 
+// GetBalance godoc
+// @Summary Get user wallet balance
+// @Description Returns the wallet balance for the authenticated user
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]string
+// @Router /wallet/balance [get]
 func (h *WalletHandler) GetBalance(c echo.Context) error {
 	fmt.Println("Get balance handler")
 	userID := c.Get("userID").(uuid.UUID)
@@ -32,7 +41,15 @@ func (h *WalletHandler) GetBalance(c echo.Context) error {
 		"balance": balance,
 	})
 }
-
+// Deposit godoc
+// @Summary Deposit to wallet 
+// @Description it deposits a to transaction and adds money to balance
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /wallet/deposit [post]
 func (h *WalletHandler) Deposit(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
 	userTierInterface := c.Get("userTier")
@@ -57,6 +74,16 @@ func (h *WalletHandler) Deposit(c echo.Context) error {
 	return c.JSON(http.StatusOK, txn)
 }
 
+// Withdraw godoc
+// @Summary Withdraw from wallet 
+// @Description Withdraws money from the wallet balance
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Param request body TransactionRequest true "Withdrawal request"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /wallet/withdraw [post]
 func (h *WalletHandler) Withdraw(c echo.Context) error {
 
 	userID := c.Get("userID").(uuid.UUID)
@@ -82,6 +109,19 @@ func (h *WalletHandler) Withdraw(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, txn)
 }
+
+// GetTransactionHistory godoc
+// @Summary Get transaction history
+// @Description Retrieves the transaction history for the user's wallet
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Param type query string false "Filter by transaction type"
+// @Param status query string false "Filter by transaction status"
+// @Param limit query integer false "Limit number of transactions (default 50)"
+// @Success 200 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /wallet/transactions [get]
 func (h *WalletHandler) GetTransactionHistory(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
 

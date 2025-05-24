@@ -9,11 +9,11 @@ import (
 
 func RegisterAuthRoutes(e *echo.Group, authHandler *handlers.AuthHandler, sessionSvc *services.SessionService) {
 	// Public
-	e.POST("/register", authHandler.Register)
-	e.POST("/login", authHandler.Login)
 
 	// Protected
 	authGroup := e.Group("")
+	authGroup.POST("/register", authHandler.Register)
+	authGroup.POST("/login", authHandler.Login)
 	authGroup.Use(middleware.AuthMiddleware(sessionSvc))
 	authGroup.GET("/profile", authHandler.Profile)
 	authGroup.POST("/tiers/upgrade", authHandler.TierUpgrade)

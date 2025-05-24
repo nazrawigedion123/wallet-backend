@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  handlers.LoginRequest:
+  auth_handlers.LoginRequest:
     description: Login request payload
     properties:
       email:
@@ -11,7 +11,7 @@ definitions:
     - email
     - password
     type: object
-  handlers.RegisterRequest:
+  auth_handlers.RegisterRequest:
     description: Registration request payload
     properties:
       email:
@@ -23,12 +23,12 @@ definitions:
     - email
     - password
     type: object
-  models.ErrorResponse:
+  github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse:
     properties:
       error:
         type: string
     type: object
-  models.LoginResponse:
+  github_com_nazrawigedion123_wallet-backend_auth_models.LoginResponse:
     properties:
       token:
         type: string
@@ -42,12 +42,12 @@ definitions:
             type: string
         type: object
     type: object
-  models.LogoutResponse:
+  github_com_nazrawigedion123_wallet-backend_auth_models.LogoutResponse:
     properties:
       message:
         type: string
     type: object
-  models.ProfileResponse:
+  github_com_nazrawigedion123_wallet-backend_auth_models.ProfileResponse:
     properties:
       email:
         type: string
@@ -56,7 +56,7 @@ definitions:
       tier:
         type: string
     type: object
-  models.RegisterResponse:
+  github_com_nazrawigedion123_wallet-backend_auth_models.RegisterResponse:
     properties:
       email:
         type: string
@@ -65,7 +65,7 @@ definitions:
       tier:
         type: string
     type: object
-  models.TierUpgradeResponse:
+  github_com_nazrawigedion123_wallet-backend_auth_models.TierUpgradeResponse:
     properties:
       email:
         type: string
@@ -73,6 +73,58 @@ definitions:
         type: integer
       tier:
         type: string
+    type: object
+  github_com_nazrawigedion123_wallet-backend_wallet_models.SimulationOptions:
+    properties:
+      count:
+        description: e.g., up to 1 million
+        type: integer
+      include_failed:
+        type: boolean
+      output_to_csv:
+        type: boolean
+      tier_distribution:
+        description: assign tiers randomly
+        type: boolean
+      transaction_types:
+        items:
+          type: string
+        type: array
+    type: object
+  github_com_nazrawigedion123_wallet-backend_webhook_models.IncomingWebhook:
+    properties:
+      amount:
+        type: number
+      event_id:
+        type: string
+      metadata:
+        $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_webhook_models.Metadata'
+      status:
+        type: string
+      timestamp:
+        type: string
+      type:
+        type: string
+      user_id:
+        type: string
+    required:
+    - amount
+    - event_id
+    - status
+    - type
+    - user_id
+    type: object
+  github_com_nazrawigedion123_wallet-backend_webhook_models.Metadata:
+    properties:
+      transactionID:
+        type: integer
+    type: object
+  wallet_handlers.TransactionRequest:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
     type: object
 host: localhost:8080
 info:
@@ -99,22 +151,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.LoginRequest'
+          $ref: '#/definitions/auth_handlers.LoginRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.LoginResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.LoginResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
       summary: Login a new user
       tags:
       - auth
@@ -124,30 +176,30 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.LogoutResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.LogoutResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
   /api/profile:
     get:
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.ProfileResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ProfileResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
   /api/register:
     post:
       consumes:
@@ -159,22 +211,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.RegisterRequest'
+          $ref: '#/definitions/auth_handlers.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.RegisterResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.RegisterResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
       summary: Register a new user
       tags:
       - auth
@@ -184,15 +236,242 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.TierUpgradeResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.TierUpgradeResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
+  /simulate/status:
+    get:
+      description: Returns the current status of background simulations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get simulation status
+      tags:
+      - Simulation
+  /simulate/transactions:
+    post:
+      description: Starts a background process to generate simulated transactions
+      parameters:
+      - description: Simulation options
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_wallet_models.SimulationOptions'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Simulate transactions
+      tags:
+      - Simulation
+  /simulate/users:
+    post:
+      description: Starts a background process to generate simulated users
+      parameters:
+      - description: Simulation options
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_wallet_models.SimulationOptions'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Simulate user creation
+      tags:
+      - Simulation
+  /wallet/balance:
+    get:
+      description: Returns the wallet balance for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user wallet balance
+      tags:
+      - Wallet
+  /wallet/deposit:
+    post:
+      description: it deposits a to transaction and adds money to balance
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Deposit to wallet
+      tags:
+      - Wallet
+  /wallet/transactions:
+    get:
+      description: Retrieves the transaction history for the user's wallet
+      parameters:
+      - description: Filter by transaction type
+        in: query
+        name: type
+        type: string
+      - description: Filter by transaction status
+        in: query
+        name: status
+        type: string
+      - description: Limit number of transactions (default 50)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get transaction history
+      tags:
+      - Wallet
+  /wallet/withdraw:
+    post:
+      description: Withdraws money from the wallet balance
+      parameters:
+      - description: Withdrawal request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/wallet_handlers.TransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Withdraw from wallet
+      tags:
+      - Wallet
+  /webhook:
+    post:
+      consumes:
+      - application/json
+      description: Handles and processes incoming webhook payloads
+      parameters:
+      - description: Webhook payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_webhook_models.IncomingWebhook'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Returns error details
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Duplicate webhook event
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Process incoming webhook
+      tags:
+      - Webhooks
 securityDefinitions:
   ApiKeyAuth:
     in: header

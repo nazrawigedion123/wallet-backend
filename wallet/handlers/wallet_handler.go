@@ -185,7 +185,18 @@ func (h *WalletHandler) GetTransactionHistory(c echo.Context) error {
 }
 
 
-
+// GetTransactionTransaction godoc
+// @Summary Get transaction history
+// @Description Retrieves the Transaction report for the all users wallet
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Param type query string false "Filter by transaction type"
+// @Param status query string false "Filter by transaction status"
+// @Param limit query integer false "Limit number of transactions (default 50)"
+// @Success 200 {array} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /report/transactions [get]
 func (h *WalletHandler) GetTransactionReport(c echo.Context) error {
 	
 

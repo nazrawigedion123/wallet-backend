@@ -107,6 +107,94 @@ docker-compose down -v
 
 ---
 
+
+## 📁 Project Structure
+
+```
+.
+├── auth
+│   ├── handlers
+│   │   └── auth_handler.go
+│   ├── middleware
+│   │   └── auth.go
+│   ├── models
+│   │   ├── response.go
+│   │   └── user.go
+│   ├── routes
+│   │   └── auth_routes.go
+│   └── services
+│       ├── auth.go
+│       └── session.go
+├── cmd
+│   └── main.go
+├── docker-compose.yml
+├── Dockerfile
+├── docs
+│   ├── docs.go
+│   ├── swagger.json
+│   └── swagger.yaml
+├── go.mod
+├── go.sum
+├── logs  [error opening dir]
+├── promtail-config.yaml  [error opening dir]
+├── README.md
+├── users_simulated.csv
+├── utils
+│   └── db.go
+├── wallet
+│   ├── handlers
+│   │   ├── simulation_handler.go
+│   │   └── wallet_handler.go
+│   ├── models
+│   │   ├── fee.go
+│   │   ├── simulate_option.go
+│   │   └── transaction.go
+│   ├── routes
+│   │   └── transaction_routes.go
+│   ├── services
+│   │   ├── simulation_services.go
+│   │   └── wallet_services.go
+│   └── utils
+│       └── sim_status.go
+├── wallet-backend
+└── webhook
+    ├── handlers
+    │   └── webhook_handler.go
+    ├── interfaces
+    │   └── interface_webservcies.go
+    ├── middleware
+    │   └── hmac_validate.go
+    ├── mocks
+    │   └── mock_webservice.go
+    ├── models
+    │   └── webhook_model.go
+    ├── processor
+    ├── queue
+    ├── routes
+    │   └── webhook_route.go
+    ├── services
+    │   └── webhook_services.go
+    ├── test
+    │   ├── main.go
+    │   └── payload.json
+    └── utils
+        └── jsonb.go
+```
+
+---
+
+## ✅ After Setup
+
+Once the containers are up and running, visit:
+
+👉 **[http://127.0.0.1:8080/swagger/](http://127.0.0.1:8080/swagger/)**
+
+to explore the **interactive API documentation** via Swagger UI.
+
+---
+
+
+
 ## 📜 License
 
 MIT License. See [LICENSE](./LICENSE).

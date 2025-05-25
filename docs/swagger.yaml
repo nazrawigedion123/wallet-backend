@@ -292,6 +292,44 @@ paths:
       summary: TierUpgrade a new user
       tags:
       - auth
+  /report/transactions:
+    get:
+      description: Retrieves the Transaction report for the all users wallet
+      parameters:
+      - description: Filter by transaction type
+        in: query
+        name: type
+        type: string
+      - description: Filter by transaction status
+        in: query
+        name: status
+        type: string
+      - description: Limit number of transactions (default 50)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties:
+                type: string
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get transaction history
+      tags:
+      - Wallet
   /simulate/status:
     get:
       description: Returns the current status of background simulations

@@ -1,6 +1,6 @@
  {
   "type": "wallet_credit",
-  "event_id": "txn_acodnnncncnjnn",         
+  "event_id": "string3",         
   "amount": 150,
   "currency": "ETB",
   "status": "success",

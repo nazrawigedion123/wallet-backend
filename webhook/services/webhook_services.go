@@ -179,7 +179,7 @@ func (s *WebhookService) handleWalletDebit(ctx context.Context, payload models.I
 	// 2. Try to update the transaction first
 	updateTx := &gorm.DB{}
 	// 1. Update wallet balance
-	
+
 	if payload.Status == string(transactionModels.StatusSuccess) || payload.Status == string(transactionModels.StatusFailed) {
 		updateTx = tx.Exec(`
 		UPDATE transactions
@@ -253,9 +253,85 @@ func (s *WebhookService) updateRedisBalance(userID uuid.UUID) error {
 }
 
 func (s *WebhookService) handleBillPayment(ctx context.Context, payload models.IncomingWebhook) error {
-	if err := s.handleWalletDebit(ctx, payload); err != nil {
-		return err
+	tx := s.DB.Begin()
+	if tx.Error != nil {
+		return fmt.Errorf("failed to begin DB transaction: %v", tx.Error)
 	}
-	// Optional: Save bill payment record or emit event
+
+	// 1. Check balance
+	var balance float64
+	err := tx.Raw(`
+		SELECT balance FROM wallet_balances
+		WHERE user_id = ?`, payload.UserID).Scan(&balance).Error
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("balance check failed: %v", err)
+	}
+	if balance < payload.Amount {
+		tx.Rollback()
+		return fmt.Errorf("insufficient balance")
+	}
+
+	// 2. Try to update the transaction first
+	updateTx := &gorm.DB{}
+	// 1. Update wallet balance
+
+	if payload.Status == string(transactionModels.StatusSuccess) || payload.Status == string(transactionModels.StatusFailed) {
+		updateTx = tx.Exec(`
+		UPDATE transactions
+		SET status = ?
+		WHERE ctid IN (
+			SELECT ctid FROM transactions
+			WHERE user_id = ? AND amount = ? AND type = ? AND status = ?
+			ORDER BY created_at ASC
+			LIMIT 1
+		)
+	`, payload.Status, payload.UserID, payload.Amount, "bill_payment", transactionModels.StatusPending)
+
+	} else {
+		return fmt.Errorf("invalid payload type")
+	}
+
+	if updateTx.Error != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to update transaction status: %v", updateTx.Error)
+	}
+	if updateTx.RowsAffected == 0 {
+		tx.Rollback()
+		return fmt.Errorf("no matching pending bill payment transaction found to update")
+	}
+
+	// 3. Deduct from wallet
+	res := tx.Exec(`
+		UPDATE wallet_balances
+		SET balance = balance - ?
+		WHERE user_id = ?`, payload.Amount, payload.UserID)
+
+	if res.Error != nil {
+		tx.Rollback()
+		return fmt.Errorf("debit failed: %v", res.Error)
+	}
+	if res.RowsAffected == 0 {
+		tx.Rollback()
+		return fmt.Errorf("user wallet not found")
+	}
+
+	// 4. Commit
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %v", err)
+	}
+
+	// 5. Update Redis balance
+	go func() {
+		pasrsedUUID, err := uuid.Parse(payload.UserID)
+		if err != nil {
+			fmt.Println("error parsing uid", err.Error())
+		}
+		_ = s.updateRedisBalance(pasrsedUUID)
+	}()
+
+	// 6. Publish Redis event
+	s.Redis.Publish(ctx, "wallet:debit", fmt.Sprintf("user:%s:amount:%f", payload.UserID, payload.Amount))
 	return nil
+
 }

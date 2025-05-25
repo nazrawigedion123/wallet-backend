@@ -205,3 +205,264 @@ MIT License. See [LICENSE](./LICENSE).
 
 Nazrawi Gedion  
 Feel free to open issues or PRs!
+
+
+---
+
+# 🧪 Wallet Backend Testing Guide
+
+This Section guides testers through the key API endpoints of the Wallet Backend project. It outlines request formats, required headers, and expected flows.
+
+## 🌐 Base URL
+
+```
+http://127.0.0.1:8080
+```
+
+---
+
+## 🔐 Authentication Flow
+
+### 1. Register Users
+
+**URL**: `/api/register`
+**Method**: `POST`
+**Payloads**:
+
+```json
+{
+  "email": "seller@gmail.com",
+  "password": "seller123"
+}
+```
+
+```json
+{
+  "email": "john@gmail.com",
+  "password": "john123"
+}
+```
+
+---
+
+### 2. Login
+
+**URL**: `/api/login`
+**Method**: `POST`
+**Payload**:
+
+```json
+{
+  "email": "john@gmail.com",
+  "password": "john123"
+}
+```
+
+🔑 **Response**: Returns a token. Use this for the following requests by setting the header:
+
+```
+Authorization: Bearer <your_token>
+```
+
+---
+
+## 👤 User Profile
+
+### 3. Get Profile
+
+**URL**: `/api/profile`
+**Method**: `GET`
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### 4. Upgrade Tier
+
+**URL**: `/api/tiers/upgrade`
+**Method**: `POST`
+**Payload**:
+
+```json
+{
+  "tier": "Premium"
+}
+```
+
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 💰 Wallet Operations
+
+### 5. Deposit
+
+**URL**: `/api/wallet/deposit`
+**Method**: `POST`
+**Payload**:
+
+```json
+{
+  "amount": 100
+}
+```
+
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### 6. Withdraw
+
+**URL**: `/api/wallet/withdraw`
+**Method**: `POST`
+**Payload**:
+
+```json
+{
+  "amount": 100
+}
+```
+
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### 7. Check Balance
+
+**URL**: `/api/wallet/balance`
+**Method**: `GET`
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### 8. Pay Bill
+
+**URL**: `/api/wallet/pay-bill`
+**Method**: `POST`
+**Payload**:
+
+```json
+{
+  "payee_id": "37a4f359-62f5-4fd8-b871-f27693cb758e", 
+  "amount": 50
+}
+```
+
+**Note**: Use the `user_id` of the seller as `payee_id`.
+
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 📜 Transactions
+
+### 9. Get Transactions
+
+**URL**: `/api/wallet/transactions`
+**Method**: `GET`
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### 10. Get Transaction Report
+
+**URL**: `/api/report/transactions`
+**Method**: `GET`
+**Headers**:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 📩 Webhook Notification
+
+### 11. Send Webhook
+
+**URL**: `/api/webhook/notify`
+**Method**: `POST`
+**Payload**:
+
+```json
+{
+  "amount": 50,
+  "event_id": "string3",
+  "status": "success",
+  "type": "bill_payment",
+  "user_id": "a9ee266a-cf25-47c1-8363-59e6d9fd13b1"
+}
+```
+
+🧾 **Headers**:
+
+* `X-Signature: <HMAC of payload using secret key "your_very_secret_key">`
+
+> 💡 Use the `event_id` ("string3") to compute the HMAC signature.
+
+---
+
+## 🧪 Simulations
+
+> 🛑 These routes do **not** require authentication.
+
+### 12. Simulate Users
+
+**URL**: `/api/simulate/users`
+**Method**: `POST`
+
+---
+
+### 13. Simulate Transactions
+
+**URL**: `/api/simulate/transactions`
+**Method**: `POST`
+
+---
+
+### 14. Simulation Status
+
+**URL**: `/api/simulate/status`
+**Method**: `GET`
+
+---
+
+## 📖 API Documentation
+
+Once the backend is running, open your browser and go to:
+
+```
+http://127.0.0.1:8080/swagger/
+```
+
+Here, you can explore all endpoints via Swagger UI.
+
+---
+

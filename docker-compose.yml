@@ -4,6 +4,7 @@ services:
   app:
     build:
       context: .
+   
     ports:
       - "8080:8080"
     depends_on:
@@ -14,6 +15,7 @@ services:
       - DB_URL=postgres://user:pass@postgres:5432/dbname?sslmode=disable
       - REDIS_URL=redis:6379
       - REDIS_ADDR=redis:6379
+      - WEBHOOK_SECRET=your_very_secret_key
 
   postgres:
     image: postgres:13

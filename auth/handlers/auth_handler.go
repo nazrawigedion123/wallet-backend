@@ -123,7 +123,6 @@ func (h *AuthHandler) Login(c echo.Context) error {
 // @Tags auth
 // @Accept json
 // @Produce json
-
 // @Success 201 {object} models.LogoutResponse
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
@@ -148,7 +147,6 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 // @Tags auth
 // @Accept json
 // @Produce json
-
 // @Success 201 {object} models.ProfileResponse
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
@@ -185,7 +183,7 @@ func (h *AuthHandler) Profile(c echo.Context) error {
 // @Tags auth
 // @Accept json
 // @Produce json
-
+// @Param request body TierUpgrade true "Registration details"
 // @Success 201 {object} models.TierUpgradeResponse
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse

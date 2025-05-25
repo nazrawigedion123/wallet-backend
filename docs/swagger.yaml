@@ -23,6 +23,14 @@ definitions:
     - email
     - password
     type: object
+  auth_handlers.TierUpgrade:
+    description: Tier upgrade request payload
+    properties:
+      tier:
+        type: string
+    required:
+    - tier
+    type: object
   github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse:
     properties:
       error:
@@ -117,6 +125,23 @@ definitions:
       transactionID:
         type: integer
     type: object
+  wallet_handlers.PayBillRequest:
+    properties:
+      amount:
+        type: number
+      payee_id:
+        type: string
+    required:
+    - amount
+    - payee_id
+    type: object
+  wallet_handlers.TransactionRequest:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -163,6 +188,11 @@ paths:
       - auth
   /api/logout:
     post:
+      consumes:
+      - application/json
+      description: Logout a new user account
+      produces:
+      - application/json
       responses:
         "201":
           description: Created
@@ -176,8 +206,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
+      summary: Logout a new user
+      tags:
+      - auth
   /api/profile:
     get:
+      consumes:
+      - application/json
+      description: Profile a new user account
+      produces:
+      - application/json
       responses:
         "201":
           description: Created
@@ -191,6 +229,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
+      summary: Profile a new user
+      tags:
+      - auth
   /api/register:
     post:
       consumes:
@@ -223,6 +264,18 @@ paths:
       - auth
   /api/tiers/upgrade:
     post:
+      consumes:
+      - application/json
+      description: TierUpgrade a new user account
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth_handlers.TierUpgrade'
+      produces:
+      - application/json
       responses:
         "201":
           description: Created
@@ -236,6 +289,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_nazrawigedion123_wallet-backend_auth_models.ErrorResponse'
+      summary: TierUpgrade a new user
+      tags:
+      - auth
   /simulate/status:
     get:
       description: Returns the current status of background simulations
@@ -336,6 +392,13 @@ paths:
   /wallet/deposit:
     post:
       description: Deposits money to the wallet balance
+      parameters:
+      - description: TransactionRequest details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/wallet_handlers.TransactionRequest'
       produces:
       - application/json
       responses:
@@ -366,6 +429,13 @@ paths:
     post:
       description: Withdraws money from the wallet balance aWithdrawdds it to the
         wallet of another person
+      parameters:
+      - description: PayBillRequest details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/wallet_handlers.PayBillRequest'
       produces:
       - application/json
       responses:
@@ -427,6 +497,13 @@ paths:
   /wallet/withdraw:
     post:
       description: Withdraws money from the wallet balance
+      parameters:
+      - description: TransactionRequest details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/wallet_handlers.TransactionRequest'
       produces:
       - application/json
       responses:

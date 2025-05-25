@@ -239,6 +239,27 @@ func (ws *WalletService) GetTransactions(userID uuid.UUID, txnType string, statu
 	return transactions, err
 }
 
+
+func (ws *WalletService) GetTransactionsReport(txnType string, status string, limit int) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+
+	query := ws.db
+
+	if txnType != "" {
+		query = query.Where("type = ?", txnType)
+	}
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if limit == 0 {
+		limit = 50
+	}
+
+	err := query.Limit(limit).Order("created_at desc").Find(&transactions).Error
+	return transactions, err
+}
+
 func calculateFee(amount float64, userTier string, config models.FeeConfig, now time.Time) (fee float64, breakdown map[string]interface{}) {
 	// Base fee
 	var basePercent float64

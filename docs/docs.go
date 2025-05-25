@@ -72,6 +72,17 @@ const docTemplate = `{
         },
         "/api/logout": {
             "post": {
+                "description": "Logout a new user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout a new user",
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -96,6 +107,17 @@ const docTemplate = `{
         },
         "/api/profile": {
             "get": {
+                "description": "Profile a new user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Profile a new user",
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -166,6 +188,28 @@ const docTemplate = `{
         },
         "/api/tiers/upgrade": {
             "post": {
+                "description": "TierUpgrade a new user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "TierUpgrade a new user",
+                "parameters": [
+                    {
+                        "description": "Registration details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_handlers.TierUpgrade"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -358,6 +402,17 @@ const docTemplate = `{
                     "Wallet"
                 ],
                 "summary": "Deposit to wallet",
+                "parameters": [
+                    {
+                        "description": "TransactionRequest details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wallet_handlers.TransactionRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -404,6 +459,17 @@ const docTemplate = `{
                     "Wallet"
                 ],
                 "summary": "payybill from wallet",
+                "parameters": [
+                    {
+                        "description": "PayBillRequest details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wallet_handlers.PayBillRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -501,6 +567,17 @@ const docTemplate = `{
                     "Wallet"
                 ],
                 "summary": "Withdraw from wallet",
+                "parameters": [
+                    {
+                        "description": "TransactionRequest details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wallet_handlers.TransactionRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -617,6 +694,18 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 3
+                }
+            }
+        },
+        "auth_handlers.TierUpgrade": {
+            "description": "Tier upgrade request payload",
+            "type": "object",
+            "required": [
+                "tier"
+            ],
+            "properties": {
+                "tier": {
+                    "type": "string"
                 }
             }
         },
@@ -762,6 +851,32 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "wallet_handlers.PayBillRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "payee_id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "payee_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "wallet_handlers.TransactionRequest": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -782,7 +897,8 @@ var SwaggerInfo = &swag.Spec{
 	Title:            "Wallet Backend API",
 	Description:      "This is a wallet backend server.",
 	InfoInstanceName: "swagger",
-    SwaggerTemplate:  docTemplate,
+	SwaggerTemplate:  docTemplate,
+
 }
 
 func init() {

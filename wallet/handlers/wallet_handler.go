@@ -53,6 +53,7 @@ func (h *WalletHandler) GetBalance(c echo.Context) error {
 // @Tags Wallet
 // @Security BearerAuth
 // @Produce json
+// @Param request body TransactionRequest true "TransactionRequest details"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -87,6 +88,7 @@ func (h *WalletHandler) Deposit(c echo.Context) error {
 // @Tags Wallet
 // @Security BearerAuth
 // @Produce json
+// @Param request body TransactionRequest true "TransactionRequest details"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Router /wallet/withdraw [post]
@@ -121,6 +123,7 @@ func (h *WalletHandler) Withdraw(c echo.Context) error {
 // @Tags Wallet
 // @Security BearerAuth
 // @Produce json
+// @Param request body PayBillRequest true "PayBillRequest details"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Router /wallet/pay-bill [post]
@@ -174,6 +177,29 @@ func (h *WalletHandler) GetTransactionHistory(c echo.Context) error {
 	}
 
 	transactions, err := h.WalletService.GetTransactions(userID, txnType, status, limit)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "could not fetch transactions"})
+	}
+
+	return c.JSON(http.StatusOK, transactions)
+}
+
+
+
+func (h *WalletHandler) GetTransactionReport(c echo.Context) error {
+	
+
+	txnType := c.QueryParam("type")
+	status := c.QueryParam("status")
+
+	limit := 50
+	if l := c.QueryParam("limit"); l != "" {
+		if parsed, err := strconv.Atoi(l); err == nil {
+			limit = parsed
+		}
+	}
+
+	transactions, err := h.WalletService.GetTransactionsReport( txnType, status, limit)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "could not fetch transactions"})
 	}

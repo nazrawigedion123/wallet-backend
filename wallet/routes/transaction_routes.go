@@ -14,6 +14,7 @@ func RegisterWalletRoutes(e *echo.Group, walletHandler *handlers.WalletHandler, 
 	walletGroup.POST("/wallet/deposit", walletHandler.Deposit)
 	walletGroup.POST("/wallet/withdraw", walletHandler.Withdraw)
 	walletGroup.GET("/wallet/transactions", walletHandler.GetTransactionHistory)
+	walletGroup.GET("/report/transactions", walletHandler.GetTransactionReport)
 	walletGroup.POST("/wallet/pay-bill", walletHandler.PayBill)
 }
 

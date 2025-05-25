@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 
@@ -44,36 +45,55 @@ type RedisConfig struct {
 }
 
 func InitDB() error {
-
-	config := DBConfig{
-		Host:     os.Getenv("HOST"),
-		Port:     os.Getenv("PORT"),
-		User:     os.Getenv("POSTGRES_USER"),
-		Password: os.Getenv("PASSWORD"),
-		DBName:   os.Getenv("DBNAME"),
+	dsn := os.Getenv("DB_URL")
+	if dsn == "" {
+		log.Fatal("❌ DB_URL environment variable is not set")
 	}
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.Host, config.Port, config.User, config.Password, config.DBName)
+
 	fmt.Println("dsn: ", dsn)
 
 	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return err
+	var db *gorm.DB
+
+	maxRetries := 10
+	for i := 1; i <= maxRetries; i++ {
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			DB = db // assign to the global DB once successful
+			break
+		}
+		log.Printf("❌ Failed to connect to DB (attempt %d/%d): %v", i, maxRetries, err)
+		time.Sleep(2 * time.Second)
 	}
-	// Auto-migrate the Transaction model
-	err = DB.AutoMigrate(&user_models.User{},
+
+	if err != nil {
+		return fmt.Errorf("❌ could not connect to DB after %d retries: %w", maxRetries, err)
+	}
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get sql.DB: %w", err)
+	}
+
+	// Enable uuid-ossp extension
+	_, err = sqlDB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+	if err != nil {
+		return fmt.Errorf("failed to create uuid-ossp extension: %w", err)
+	}
+
+	// Auto-migrate the models
+	err = DB.AutoMigrate(
+		&user_models.User{},
 		&wallet_models.Transaction{},
 		&wallet_models.WalletBalance{},
 		&webhook_models.WebhookEvent{},
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("❌ migration failed: %w", err)
 	}
 
-	log.Println("Auto migration complete")
-
-	log.Println("Connected to PostgreSQL database")
+	log.Println("✅ Auto migration complete")
+	log.Println("✅ Connected to PostgreSQL database")
 	return nil
 }
 

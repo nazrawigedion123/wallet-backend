@@ -11,6 +11,7 @@ type TransactionType string
 type TransactionStatus string
 
 const (
+	BillPaymentTransaction TransactionType = "bill_payment"
 	DepositTransaction  TransactionType = "deposit"
 	WithdrawTransaction TransactionType = "withdraw"
 

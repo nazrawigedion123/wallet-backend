@@ -87,7 +87,7 @@ func (ws *WalletService) Deposit(userID uuid.UUID, userTier string, amount float
 		return nil, err
 	}
 
-	txn := ws.createTransaction(userID, userTier, amount, models.DepositTransaction)
+	txn := ws.createTransaction(userID, amount, models.DepositTransaction)
 	ws.dbWriter <- txn
 
 	return &txn, nil
@@ -110,7 +110,7 @@ func (ws *WalletService) Withdraw(userID uuid.UUID, userTier string, amount floa
 		return nil, err
 	}
 
-	txn := ws.createTransaction(userID, userTier, amount, models.WithdrawTransaction)
+	txn := ws.createTransaction(userID,  amount, models.WithdrawTransaction)
 	ws.dbWriter <- txn
 
 	return &txn, nil
@@ -120,7 +120,53 @@ func (ws *WalletService) Withdraw(userID uuid.UUID, userTier string, amount floa
 func (ws *WalletService) balanceKey(userID uuid.UUID) string {
 	return fmt.Sprintf("wallet:balance:%s", userID)
 }
+func (ws *WalletService) PayBill(payerID uuid.UUID, payerTier string, payeeID uuid.UUID, amount float64) (*models.Transaction, error) {
+	if amount <= 0 {
+		return nil, errors.New("amount must be greater than zero")
+	}
+	if payerID == payeeID {
+		return nil, errors.New("payer and payee cannot be the same")
+	}
 
+	// Check balance
+	payerBalance, _ := ws.GetBalance(payerID)
+	if payerBalance < amount {
+		return nil, errors.New("insufficient balance")
+	}
+
+	// Start transaction (assuming GORM DB)
+	tx := ws.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Update balances
+	if err := ws.setBalanceTx(tx, payerID, payerBalance-amount); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	payeeBalance, _ := ws.GetBalance(payeeID)
+	if err := ws.setBalanceTx(tx, payeeID, payeeBalance+amount); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Create transaction record (payer perspective)
+	txn := ws.createTransactionBill(payerID, payerTier, amount, models.BillPaymentTransaction)
+	if err := tx.Create(&txn).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	tx.Commit()
+	return &txn, nil
+}
+func (ws *WalletService) setBalanceTx(tx *gorm.DB, userID uuid.UUID, amount float64) error {
+	return tx.Model(&models.WalletBalance{}).Where("user_id = ?", userID).Update("balance", amount).Error
+}
 func (ws *WalletService) setBalance(userID uuid.UUID, balance float64) error {
 	// Store in Redis (optional but good for fast access)
 	data, _ := json.Marshal(balance)
@@ -144,7 +190,7 @@ func (ws *WalletService) setBalance(userID uuid.UUID, balance float64) error {
 	return err
 }
 
-func (ws *WalletService) createTransaction(userID uuid.UUID, userTier string, amount float64, txnType models.TransactionType) models.Transaction {
+func (ws *WalletService) createTransactionBill(userID uuid.UUID, userTier string, amount float64, txnType models.TransactionType) models.Transaction {
 	feeConfig := models.FeeConfig{TransactionType: "bill_payment", Tier: models.BasicTier, BasePercent: 3.0, Cap: 100.0, Floor: 2.0, PeakStart: time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 17, 0, 0, 0, time.Local), PeakEnd: time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 21, 0, 0, 0, time.Local), PeakSurcharge: 1.0}
 	fee, breakdown := calculateFee(amount, userTier, feeConfig, time.Now())
 
@@ -159,6 +205,18 @@ func (ws *WalletService) createTransaction(userID uuid.UUID, userTier string, am
 		Fee:          fee,
 		NetAmount:    amount + fee,
 		FeeBreakdown: breakdownJSON,
+	}
+}
+
+func (ws *WalletService) createTransaction(userID uuid.UUID,  amount float64, txnType models.TransactionType) models.Transaction {
+	
+
+	return models.Transaction{
+		UserID: userID,
+		Amount: amount,
+		Type:   txnType,
+		// CreatedAt: time.Now(),
+	
 	}
 }
 func (ws *WalletService) GetTransactions(userID uuid.UUID, txnType string, status string, limit int) ([]models.Transaction, error) {

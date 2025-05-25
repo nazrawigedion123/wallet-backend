@@ -10,6 +10,11 @@ import (
 	"github.com/nazrawigedion123/wallet-backend/wallet/services"
 )
 
+type PayBillRequest struct {
+	PayeeID uuid.UUID `json:"payee_id" validate:"required"`
+	Amount  float64   `json:"amount" validate:"required,gt=0"`
+}
+
 type WalletHandler struct {
 	WalletService *services.WalletService
 }
@@ -18,6 +23,15 @@ type TransactionRequest struct {
 	Amount float64 `json:"amount" validate:"required,gt=0"`
 }
 
+// GetBalance godoc
+// @Summary Get user wallet balance
+// @Description Returns the wallet balance for the authenticated user
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]string
+// @Router /wallet/balance [get]
 func (h *WalletHandler) GetBalance(c echo.Context) error {
 	fmt.Println("Get balance handler")
 	userID := c.Get("userID").(uuid.UUID)
@@ -33,6 +47,16 @@ func (h *WalletHandler) GetBalance(c echo.Context) error {
 	})
 }
 
+// Deposit godoc
+// @Summary Deposit to wallet
+// @Description Deposits money to the wallet balance
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /wallet/deposit [post]
 func (h *WalletHandler) Deposit(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
 	userTierInterface := c.Get("userTier")
@@ -57,6 +81,15 @@ func (h *WalletHandler) Deposit(c echo.Context) error {
 	return c.JSON(http.StatusOK, txn)
 }
 
+// Withdraw godoc
+// @Summary Withdraw from wallet
+// @Description Withdraws money from the wallet balance
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /wallet/withdraw [post]
 func (h *WalletHandler) Withdraw(c echo.Context) error {
 
 	userID := c.Get("userID").(uuid.UUID)
@@ -66,7 +99,6 @@ func (h *WalletHandler) Withdraw(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid user tier")
 	}
 
-
 	var req TransactionRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
@@ -75,13 +107,59 @@ func (h *WalletHandler) Withdraw(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	txn, err := h.WalletService.Withdraw(userID,userTier, req.Amount)
+	txn, err := h.WalletService.Withdraw(userID, userTier, req.Amount)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, txn)
 }
+
+// Paybill godoc
+// @Summary payybill from wallet
+// @Description Withdraws money from the wallet balance aWithdrawdds it to the wallet of another person
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /wallet/pay-bill [post]
+func (h *WalletHandler) PayBill(c echo.Context) error {
+	payerID := c.Get("userID").(uuid.UUID)
+	tierInterface := c.Get("userTier")
+	payerTier, ok := tierInterface.(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid user tier")
+	}
+
+	var req PayBillRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+	}
+	if err := c.Validate(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	txn, err := h.WalletService.PayBill(payerID, payerTier, req.PayeeID, req.Amount)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, txn)
+}
+
+// GetTransactionHistory godoc
+// @Summary Get transaction history
+// @Description Retrieves the transaction history for the user's wallet
+// @Tags Wallet
+// @Security BearerAuth
+// @Produce json
+// @Param type query string false "Filter by transaction type"
+// @Param status query string false "Filter by transaction status"
+// @Param limit query integer false "Limit number of transactions (default 50)"
+// @Success 200 {array} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /wallet/transactions [get]
 func (h *WalletHandler) GetTransactionHistory(c echo.Context) error {
 	userID := c.Get("userID").(uuid.UUID)
 

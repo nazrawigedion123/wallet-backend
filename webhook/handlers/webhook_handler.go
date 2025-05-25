@@ -19,6 +19,18 @@ func NewWebhookHandler(webhookService *services.WebhookService) *WebhookHandler 
 	}
 }
 
+// HandleWebhook godoc
+// @Summary Process incoming webhook
+// @Description Handles and processes incoming webhook payloads
+// @Tags Webhooks
+// @Accept json
+// @Produce json
+// @Param payload body models.IncomingWebhook true "Webhook payload"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]interface{} "Returns error details"
+// @Failure 409 {object} map[string]string "Duplicate webhook event"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /webhook [post]
 func (h *WebhookHandler) HandleWebhook(c echo.Context) error {
 
 

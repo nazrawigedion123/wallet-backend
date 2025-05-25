@@ -14,10 +14,13 @@ func RegisterWalletRoutes(e *echo.Group, walletHandler *handlers.WalletHandler, 
 	walletGroup.POST("/wallet/deposit", walletHandler.Deposit)
 	walletGroup.POST("/wallet/withdraw", walletHandler.Withdraw)
 	walletGroup.GET("/wallet/transactions", walletHandler.GetTransactionHistory)
+	walletGroup.POST("/wallet/pay-bill", walletHandler.PayBill)
 }
 
-func RegisterSimulationRoutes(e *echo.Group, walletHandler *handlers.WalletHandler){
+func RegisterSimulationRoutes(e *echo.Group, walletHandler *handlers.WalletHandler) {
 	simGroup := e.Group("")
 
 	simGroup.POST("/simulate/users", walletHandler.SimulateUsers)
+	simGroup.GET("/simulate/transactions", walletHandler.SimulateTransactions)
+	simGroup.GET("/simulate/status", walletHandler.GetSimulationStatus)
 }
